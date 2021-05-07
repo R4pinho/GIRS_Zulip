@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zulip-rabbitmq
+  namespace: zulip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zulip
+      component: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: zulip
+        component: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: 10.110.0.3:5000/zulip/rabbitmq:3.8
+        resources:
+          limits:
+            cpu: 75m
+            memory: 768Mi
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          value: "zulip"
+        - name: RABBITMQ_DEFAULT_PASS
+          #value: "${ZULIP_RABBITMQ_PASSWORD}"
+          value: 'secret'
+        volumeMounts:
+          - name: data
+            mountPath: /var/lib/rabbitmq
+        ports:
+          - name: rabbitmq
+            containerPort: 5672
+            protocol: TCP
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: zulip-rabbitmq-data

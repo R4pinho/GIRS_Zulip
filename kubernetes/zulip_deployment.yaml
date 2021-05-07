@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zulip
+  namespace: zulip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zulip
+      component: zulip
+  template:
+    metadata:
+      labels:
+        app: zulip
+        component: zulip
+    spec:
+      containers:
+      - name: zulip
+        image: 10.110.0.3:5000/zulip/zulipv2:3.4
+        resources:
+          limits:
+            cpu: 500m
+            memory: 4Gi
+        env:
+        # Postgres
+        - name: DB_HOST
+          value: 'zulip-postgres'
+
+        # Memcached
+        - name: SETTING_MEMCACHED_LOCATION
+          value: 'zulip-memcached:11211'
+
+        # Redis
+        - name: SETTING_REDIS_HOST
+          value: 'zulip-redis'
+
+        # RabbitMQ
+        - name: SETTING_RABBITMQ_HOST
+          value: 'zulip-rabbitmq'
+        - name: SETTING_RABBITMQ_USERNAME
+          value: 'zulip'
+        - name: SETTING_RABBITMQ_PASSWORD
+          #value: '${ZULIP_RABBITMQ_PASSWORD}'
+          value: 'secret'
+
+        # Zulip settings
+        - name: SETTING_EXTERNAL_HOST
+          value: 'zulip.k3s'
+        - name: SETTING_ZULIP_ADMINISTRATOR
+          value: 'test@zulip.com'
+        - name: ZULIP_AUTH_BACKENDS
+          value: 'EmailAuthBackend'
+        - name: ZULIP_USER_EMAIL
+          value: 'test@zulip.com'
+        - name: ZULIP_USER_DOMAIN
+          value: 'zulip.k3s'
+        - name: ZULIP_USER_PASS
+          #value: '${ZULIP_USER_PASSWORD}'
+          value: 'secret'
+        - name: DISABLE_HTTPS # SSL termination @ the proxy
+          value: 'True'
+        - name: SSL_CERTIFICATE_GENERATION
+          value: 'self-signed'
+
+        # Secrets
+        - name: SECRETS_secret_key
+          #value: '${ZULIP_SECRET_KEY}'
+          value: 'secret'
+        - name: SECRETS_postgres_password
+          #value: '${ZULIP_POSTGRES_PASSWORD}'
+          value: 'secret'
+        - name: SECRETS_rabbitmq_password
+          #value: '${ZULIP_RABBITMQ_PASSWORD}'
+          value: 'secret'
+        - name: SECRETS_redis_password
+          #value: '${ZULIP_RABBITMQ_PASSWORD}'
+          value: 'secret'
+
+        # - name: PUSH_NOTIFICATION_BOUNCER_URL
+        # value: 'https://push.zulipchat.com'
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: zulip-data
+
+      

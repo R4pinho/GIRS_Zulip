@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zulip-redis
+  namespace: zulip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zulip
+      component: redis
+  template:
+    metadata:
+      labels:
+        app: zulip
+        component: redis
+    spec:
+      containers:
+      - name: redis
+        image: 10.110.0.3:5000/zulip/redis:6.2.0 
+        command: ["/bin/sh", "-euc"]
+        args: ["echo \"requirepass '$$REDIS_PASSWORD'\" > /etc/redis.conf && exec redis-server /etc/redis.conf"]
+        resources:
+          limits:
+            cpu: 50m
+        env:
+        - name: REDIS_PASSWORD
+          value: "secret"
+        ports:
+        - name: redis
+          containerPort: 6379
+          protocol: TCP
+        volumeMounts:
+          - name: data
+            mountPath: /var/lib/redis
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: zulip-redis-data
