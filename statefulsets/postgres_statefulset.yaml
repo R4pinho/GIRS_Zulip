@@ -1,14 +1,15 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: zulip-postgres
   namespace: zulip
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: zulip
       component: postgres
+  serviceName: "zulip-postgres"
   template:
     metadata:
       labels:
@@ -35,8 +36,9 @@ spec:
             secretKeyRef:
               name: zulip-secret
               key: pgsql.password
+          
         volumeMounts:
-          - name: data
+          - name: zulip-postgres-data
             mountPath: /var/lib/postgresql
           - name: pg-entrypoint
             mountPath: /docker-entrypoint-initdb.d
@@ -47,12 +49,19 @@ spec:
           name: postgres
           protocol: TCP
       volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: zulip-postgres-data
-      - name: pg-entrypoint
-        configMap:
-          name: zulip-postgres-entrypoint
-      - name: pg-command
-        configMap:
-          name: zulip-postgres-command
+        - name: pg-entrypoint
+          configMap:
+            name: zulip-postgres-entrypoint
+        - name: pg-command
+          configMap:
+            name: zulip-postgres-command         
+  volumeClaimTemplates:
+  - metadata:
+      name: zulip-postgres-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: 1Gi
+      

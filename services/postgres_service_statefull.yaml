@@ -9,6 +9,7 @@ spec:
   selector:
     app: zulip
     component: postgres
+  clusterIP: None
   ports:
   - name: postgres
     port: 5432
