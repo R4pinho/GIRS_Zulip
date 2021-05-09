@@ -17,9 +17,9 @@ ENV LANG en_US.utf8
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV PG_MAJOR 13
-ENV PG_VERSION 13.2
-ENV PG_SHA256 5fd7fcd08db86f5b2aed28fcfaf9ae0aca8e9428561ac547764c2a2b0f41adfc
+ENV PG_MAJOR 11
+ENV PG_VERSION 11.11
+ENV PG_SHA256 40607b7fa15b7d63f5075a7277daf7b3412486aa5db3aedffdb7768b9298186c
 
 RUN set -eux; \
 	\
@@ -146,6 +146,7 @@ RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PG
 VOLUME /var/lib/postgresql/data
 
 COPY docker-entrypoint.sh /usr/local/bin/
+RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL

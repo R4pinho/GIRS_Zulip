@@ -26,8 +26,10 @@ spec:
         - name: RABBITMQ_DEFAULT_USER
           value: "zulip"
         - name: RABBITMQ_DEFAULT_PASS
-          #value: "${ZULIP_RABBITMQ_PASSWORD}"
-          value: 'secret'
+          valueFrom:
+            secretKeyRef:
+              name: zulip-secret
+              key: rabbitmq.password
         volumeMounts:
           - name: data
             mountPath: /var/lib/rabbitmq

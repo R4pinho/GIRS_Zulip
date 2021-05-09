@@ -31,8 +31,10 @@ spec:
         - name: POSTGRES_USER
           value: "zulip"
         - name: POSTGRES_PASSWORD
-          #value: "${ZULIP_POSTGRES_PASSWORD}"
-          value: "secret"
+          valueFrom:
+            secretKeyRef:
+              name: zulip-secret
+              key: pgsql.password
         volumeMounts:
           - name: data
             mountPath: /var/lib/postgresql

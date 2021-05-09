@@ -25,7 +25,10 @@ spec:
             cpu: 50m
         env:
         - name: REDIS_PASSWORD
-          value: "secret"
+          valueFrom:
+            secretKeyRef:
+              name: zulip-secret
+              key: redis.password
         ports:
         - name: redis
           containerPort: 6379

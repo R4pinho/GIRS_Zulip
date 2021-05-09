@@ -15,5 +15,5 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: zulip
+          serviceName: zulip-nginx
           servicePort: 80

@@ -41,8 +41,10 @@ spec:
         - name: SETTING_RABBITMQ_USERNAME
           value: 'zulip'
         - name: SETTING_RABBITMQ_PASSWORD
-          #value: '${ZULIP_RABBITMQ_PASSWORD}'
-          value: 'secret'
+          valueFrom:
+            secretKeyRef:
+              name: zulip-secret
+              key: rabbitmq.password
 
         # Zulip settings
         - name: SETTING_EXTERNAL_HOST
@@ -51,13 +53,6 @@ spec:
           value: 'test@zulip.com'
         - name: ZULIP_AUTH_BACKENDS
           value: 'EmailAuthBackend'
-        - name: ZULIP_USER_EMAIL
-          value: 'test@zulip.com'
-        - name: ZULIP_USER_DOMAIN
-          value: 'zulip.k3s'
-        - name: ZULIP_USER_PASS
-          #value: '${ZULIP_USER_PASSWORD}'
-          value: 'secret'
         - name: DISABLE_HTTPS # SSL termination @ the proxy
           value: 'True'
         - name: SSL_CERTIFICATE_GENERATION
@@ -65,17 +60,25 @@ spec:
 
         # Secrets
         - name: SECRETS_secret_key
-          #value: '${ZULIP_SECRET_KEY}'
-          value: 'secret'
+          valueFrom:
+            secretKeyRef:
+              name: zulip-secret
+              key: zulip.secretkey
         - name: SECRETS_postgres_password
-          #value: '${ZULIP_POSTGRES_PASSWORD}'
-          value: 'secret'
+          valueFrom:
+            secretKeyRef:
+              name: zulip-secret
+              key: pgsql.password
         - name: SECRETS_rabbitmq_password
-          #value: '${ZULIP_RABBITMQ_PASSWORD}'
-          value: 'secret'
+          valueFrom:
+            secretKeyRef:
+              name: zulip-secret
+              key: rabbitmq.password
         - name: SECRETS_redis_password
-          #value: '${ZULIP_RABBITMQ_PASSWORD}'
-          value: 'secret'
+          valueFrom:
+            secretKeyRef:
+              name: zulip-secret
+              key: redis.password
 
         # - name: PUSH_NOTIFICATION_BOUNCER_URL
         # value: 'https://push.zulipchat.com'

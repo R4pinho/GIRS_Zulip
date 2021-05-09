@@ -1,4 +1,4 @@
-FROM 10.110.0.3:5000/zulip/postgres:13.2
+FROM 10.110.0.3:5000/zulip/postgres:11
 
 RUN \
   apk --no-cache add \
