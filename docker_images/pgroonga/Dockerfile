@@ -1,4 +1,4 @@
-FROM 10.110.0.3:5000/zulip/postgres:11
+FROM 10.110.0.3:5000/zulip/postgres:13.2
 
 RUN \
   apk --no-cache add \
@@ -27,7 +27,8 @@ RUN \
   make HAVE_MSGPACK=1 -j$(nproc) && \
   make install && \
   cd ../ && \
-  rm -rf build
+  rm -rf build \
+  mkdir -p /var/lib/postgresql/data/pgdata/mnt/server/archivedir
 
 RUN \
   apk del \

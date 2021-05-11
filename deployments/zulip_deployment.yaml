@@ -37,7 +37,7 @@ spec:
 
         # RabbitMQ
         - name: SETTING_RABBITMQ_HOST
-          value: 'zulip-rabbitmq'
+          value: 'zulip-rabbitmqcluster'
         - name: SETTING_RABBITMQ_USERNAME
           value: 'zulip'
         - name: SETTING_RABBITMQ_PASSWORD

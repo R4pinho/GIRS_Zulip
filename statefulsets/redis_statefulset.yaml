@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zulip-redis
+  namespace: zulip
+spec:
+  serviceName: zulip-redis
+  replicas: 6
+  selector:
+    matchLabels:
+      app: zulip
+      component: redis
+  template:
+    metadata:
+      labels:
+        app: zulip
+        component: redis
+    spec:
+      containers:
+      - name: redis
+        image: 10.110.0.3:5000/zulip/redis:6.2.0 
+        ports:
+        - containerPort: 6379
+          name: client
+        - containerPort: 16379
+          name: gossip
+        command: ["/conf/update-node.sh", "redis-server", "/conf/redis.conf"]
+        #command: ["/conf/update-node.sh", "redis-server", "/bin/sh", "-euc", "/conf/redis.conf"]
+        #args: ["echo \"requirepass '$$REDIS_PASSWORD'\" > /etc/redis.conf && exec redis-server /etc/redis.conf"]  
+        resources:
+          limits:
+            cpu: 50m
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: zulip-secret
+              key: redis.password
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        volumeMounts:
+        - name: conf
+          mountPath: /conf
+          readOnly: false
+        - name: redis-data
+          mountPath: /data
+          readOnly: false
+      volumes:
+      - name: conf
+        configMap:
+          name: zulip-redis-config
+          defaultMode: 0755
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+      namespace: zulip
+    spec:
+      storageClassName: longhorn
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: "1Gi"

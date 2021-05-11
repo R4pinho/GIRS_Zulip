@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zulip-postgres
+  namespace: zulip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zulip
+      component: postgres
+  template:
+    metadata:
+      labels:
+        app: zulip
+        component: postgres
+    spec:
+      containers:
+      - name: postgresql
+        image: 10.110.0.3:5000/zulip/pgroonga:2.2.9
+        command: ["/bin/bash"]
+        args:
+          - /pg-command/start.sh
+        resources:
+          limits:
+            cpu: 200m
+            memory: 1Gi
+        env:
+        - name: POSTGRES_DB
+          value: "zulip"
+        - name: POSTGRES_USER
+          value: "zulip"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: zulip-secret
+              key: pgsql.password
+        volumeMounts:
+          - name: data
+            mountPath: /var/lib/postgresql
+          - name: pg-entrypoint
+            mountPath: /docker-entrypoint-initdb.d
+          - name: pg-command
+            mountPath: /pg-command
+        ports:
+        - containerPort: 5432
+          name: postgres
+          protocol: TCP
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: zulip-postgres-data
+      - name: pg-entrypoint
+        configMap:
+          name: zulip-postgres-entrypoint
+      - name: pg-command
+        configMap:
+          name: zulip-postgres-command
